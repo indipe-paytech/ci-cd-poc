@@ -13,6 +13,29 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+      - name: Download Assets
+        uses: carlosperate/download-file-action@v2
+        id: splash
+        with:
+          file-url: 'https://i.postimg.cc/xcVdwHxS/splash.png'
+          location: './assets/splash_icon'
+      - name: Print the file path
+        run: echo "The file was downloaded to ${{ steps.download-file.outputs.file-path }}"
+      - name: Download Assets
+        uses: carlosperate/download-file-action@v2
+        with:
+          file-url: 'https://i.postimg.cc/xcVdwHxS/splash-dark.png'
+          location: './assets/splash_icon'
+      - name: Download Assets
+        uses: carlosperate/download-file-action@v2
+        with:
+          file-url: 'https://i.postimg.cc/xcVdwHxS/splash-a12.png'
+          location: './assets/splash_icon'
+      - name: Download Assets
+        uses: carlosperate/download-file-action@v2
+        with:
+          file-url: 'https://i.postimg.cc/xcVdwHxS/splash-a12-dark.png'
+          location: './assets/splash_icon'
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
