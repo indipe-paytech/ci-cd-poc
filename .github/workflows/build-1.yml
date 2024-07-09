@@ -46,7 +46,7 @@ jobs:
       - name: Install Global Dependencies
         run: dart pub global activate flutter_native_splash
       - name: Create Splash Screen
-        run: dart run flutter_native_splash:create --path=config/splash.yaml
+        run: dart run flutter_native_splash:create --path=splash.yaml
       - name: Build apk
         run: flutter build apk --split-per-abi
       - name: Retrieve Release Version
