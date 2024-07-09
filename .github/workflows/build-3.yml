@@ -1,4 +1,4 @@
-name: Test Build
+name: Test Build 3
 
 on:
   workflow_dispatch:
@@ -13,6 +13,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+      - uses: wow-actions/download-upload@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          url: the-file-url-to-download
+          dir: the-dir-to-save-the-file
+          filename: the-file-name-to-save-default-parsed-from-url
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
