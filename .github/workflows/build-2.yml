@@ -25,16 +25,19 @@ jobs:
         uses: carlosperate/download-file-action@v2
         with:
           file-url: 'https://i.postimg.cc/xcVdwHxS/splash-dark.png'
+          file-name: 'splash_dark.png'
           location: './assets/splash_icon'
       - name: Download Assets
         uses: carlosperate/download-file-action@v2
         with:
           file-url: 'https://i.postimg.cc/xcVdwHxS/splash-a12.png'
+          file-name: 'splash_a12.png'
           location: './assets/splash_icon'
       - name: Download Assets
         uses: carlosperate/download-file-action@v2
         with:
           file-url: 'https://i.postimg.cc/xcVdwHxS/splash-a12-dark.png'
+          file-name: 'splash_a12_dark.png'
           location: './assets/splash_icon'
       - name: Setup Java
         uses: actions/setup-java@v3
