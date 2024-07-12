@@ -1,125 +1,151 @@
-import 'package:flutter/material.dart';
+import 'dart:developer';
 
-void main() {
-  runApp(const MyApp());
-}
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+      routerConfig: GoRouter(
+        debugLogDiagnostics: true,
+        routes: [
+          GoRoute(
+            path: '/',
+            builder: (context, state) => const HomePage(),
+          ),
+          GoRoute(
+            name: 'chat',
+            path: '/chat',
+            builder: (context, state) => const ChatPage(),
+          ),
+          GoRoute(
+            name: 'chatOpen',
+            path: '/chat/:id',
+            builder: (context, state) {
+              final id = state.pathParameters['id'];
+
+              return ChatPage(id: id);
+            },
+          ),
+        ],
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Home')),
+      body: const Center(child: Text('Test')),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.goNamed('chat'),
+        child: const Icon(Icons.navigate_next),
+      ),
+    );
+  }
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class ChatPage extends StatefulWidget {
+  const ChatPage({super.key, this.id});
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  final String? id;
+
+  @override
+  State<ChatPage> createState() => _ChatPageState();
+}
+
+class _ChatPageState extends State<ChatPage> {
+  @override
+  void initState() {
+    super.initState();
+    log('ChatPage Opened');
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+      appBar: AppBar(title: const Text('Chat')),
+      body: Row(
+        children: [
+          const SizedBox(width: 300, child: ChatList()),
+          if (widget.id != null) Expanded(child: ChatView(id: widget.id!)),
+        ],
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
+
+class ChatList extends StatelessWidget {
+  const ChatList({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemBuilder: (context, i) {
+        return ListTile(
+          onTap: () => context.goNamed(
+            'chatOpen',
+            pathParameters: {'id': '$i'},
+          ),
+          title: Text('Chat $i'),
+          subtitle: Text('Sample $i'),
+          trailing: const Icon(Icons.navigate_next),
+        );
+      },
+    );
+  }
+}
+
+class ChatView extends StatelessWidget {
+  const ChatView({super.key, required this.id});
+
+  final String id;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(child: Text(id));
+  }
+}
+
+/*
+  [GoRouter] setting initial location null
+  [GoRouter] Using MaterialApp configuration
+  [GoRouter] getting location for name: "chat"
+  [GoRouter] going to /chat
+  [log] ChatPage Opened
+  [GoRouter] getting location for name: "chatOpen", pathParameters: {id: 0}
+  [GoRouter] going to /chat/0
+  [log] ChatPage Opened
+  [GoRouter] getting location for name: "chatOpen", pathParameters: {id: 1}
+  [GoRouter] going to /chat/1
+  [GoRouter] getting location for name: "chatOpen", pathParameters: {id: 1}
+  [GoRouter] going to /chat/1
+  [GoRouter] getting location for name: "chatOpen", pathParameters: {id: 2}
+  [GoRouter] going to /chat/2
+  [GoRouter] getting location for name: "chatOpen", pathParameters: {id: 3}
+  [GoRouter] going to /chat/3
+  [GoRouter] getting location for name: "chatOpen", pathParameters: {id: 4}
+  [GoRouter] going to /chat/4
+  [GoRouter] getting location for name: "chatOpen", pathParameters: {id: 5}
+  [GoRouter] going to /chat/5
+  [GoRouter] getting location for name: "chatOpen", pathParameters: {id: 6}
+  [GoRouter] going to /chat/6
+  [GoRouter] getting location for name: "chatOpen", pathParameters: {id: 7}
+  [GoRouter] going to /chat/7
+  [GoRouter] getting location for name: "chatOpen", pathParameters: {id: 8}
+  [GoRouter] going to /chat/8
+  [GoRouter] getting location for name: "chatOpen", pathParameters: {id: 9}
+  [GoRouter] going to /chat/9
+  [GoRouter] getting location for name: "chatOpen", pathParameters: {id: 11}
+  [GoRouter] going to /chat/11
+*/
