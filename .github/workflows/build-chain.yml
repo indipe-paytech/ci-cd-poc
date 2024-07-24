@@ -1,0 +1,62 @@
+name: Test Build Chain
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    environment:
+      name: Android
+      url: ${{ steps.deployments.outputs.alias }}
+    name: Build APK and Create release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Get Partner Details
+        id: partners
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: 'https://dummyjson.com/c/78ea-b477-4a21-af9b'
+          method: 'GET'
+      - name: Download Assets
+        run: |
+          partners=fromJson(steps.partners.outputs.response).partners
+          for partner in $partners
+          do
+            url=$(echo $partner | jq -r '.url')
+            name=$(echo $partner | jq -r '.name')
+            echo "Downloading $name from $url"
+            wget -nc -P ./assets/$name $url
+          done
+        shell: bash
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.2'
+          channel: 'stable'
+      - name: Install Global Dependencies
+        run: dart pub global activate flutter_native_splash
+      - name: Create Splash Screen
+        run: dart run flutter_native_splash:create --path=splash.yaml
+      - name: Build apk
+        run: flutter build apk --split-per-abi
+      - name: Retrieve Release Version
+        id: versionstep
+        run: |
+          VERSION=$(more pubspec.yaml | grep version: | cut -d ' ' -f2)-dev
+          echo "::set-output name=VERSION::$VERSION"
+      - name: Create a Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "build/app/outputs/apk/release/*.apk"
+          token: ${{ secrets.GH_TOKEN }}
+          tag: ${{ steps.versionstep.outputs.VERSION }}
+          commit: ${{ github.sha }}
+          allowUpdates: true
