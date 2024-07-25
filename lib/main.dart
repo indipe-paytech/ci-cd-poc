@@ -3,10 +3,12 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  MyApp({super.key});
+
+  final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
 
   @override
   Widget build(BuildContext context) {
@@ -23,16 +25,36 @@ class MyApp extends StatelessWidget {
             name: 'chat',
             path: '/chat',
             builder: (context, state) => const ChatPage(),
+            // routes: [
+            //   GoRoute(
+            //     name: 'chatOpen',
+            //     path: ':id',
+            //     pageBuilder: (context, state) {
+            //       final id = state.pathParameters['id'];
+
+            //       return NoTransitionPage(child: ChatPage(id: id));
+            //     },
+            //   ),
+            // ],
           ),
           GoRoute(
             name: 'chatOpen',
             path: '/chat/:id',
-            builder: (context, state) {
+            pageBuilder: (context, state) {
               final id = state.pathParameters['id'];
 
-              return ChatPage(id: id);
+              return NoTransitionPage(child: ChatPage(id: id));
             },
           ),
+          // GoRoute(
+          //   name: 'chatOpen',
+          //   path: '/chat/:id',
+          //   builder: (context, state) {
+          //     final id = state.pathParameters['id'];
+
+          //     return ChatPage(id: id);
+          //   },
+          // ),
         ],
       ),
     );
