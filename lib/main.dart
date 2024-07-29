@@ -25,17 +25,6 @@ class MyApp extends StatelessWidget {
             name: 'chat',
             path: '/chat',
             builder: (context, state) => const ChatPage(),
-            // routes: [
-            //   GoRoute(
-            //     name: 'chatOpen',
-            //     path: ':id',
-            //     pageBuilder: (context, state) {
-            //       final id = state.pathParameters['id'];
-
-            //       return NoTransitionPage(child: ChatPage(id: id));
-            //     },
-            //   ),
-            // ],
           ),
           GoRoute(
             name: 'chatOpen',
@@ -46,15 +35,6 @@ class MyApp extends StatelessWidget {
               return NoTransitionPage(child: ChatPage(id: id));
             },
           ),
-          // GoRoute(
-          //   name: 'chatOpen',
-          //   path: '/chat/:id',
-          //   builder: (context, state) {
-          //     final id = state.pathParameters['id'];
-
-          //     return ChatPage(id: id);
-          //   },
-          // ),
         ],
       ),
     );

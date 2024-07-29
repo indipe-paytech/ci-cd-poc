@@ -1,0 +1,27 @@
+name: Update Partner Branches
+
+on:
+  workflow_dispatch:
+  push: development
+
+jobs:
+  update-deployments:
+    name: Update Branches
+    runs-on: ubuntu-latest
+    environment:
+      name: Trigger
+      url: ${{ steps.deployments.outputs.alias }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.7
+
+      - name: Update all branche start with 'dev/'
+        run: |
+          for b in $(git branch -r | grep "origin/dev/"); do
+            branch=$(echo $b | sed 's|origin/||')
+            git checkout $branch
+            git pull origin $branch
+            git merge origin/development
+            git push origin $branch
+          done
