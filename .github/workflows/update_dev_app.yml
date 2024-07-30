@@ -1,74 +1,86 @@
-name: Update Dev App
+name: Update Staging App
 
 on:
   workflow_dispatch:
-  push: dev/*
+  push:
+    branches:
+      - stg/*
 
 jobs:
   android:
-    name: Build Android App
-    runs-on: ubuntu-latest
     environment:
       name: android
       url: ${{ steps.deployments.outputs.alias }}
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4.1.7
+    name: Build Android App
+    runs-on: ubuntu-latest
 
+    steps:
       - name: Checkout Partner repository
         uses: actions/checkout@v4.1.7
-        repository: indipe-paytech/indipe-partner-app
-        submodules: recursive
-        token: ${{ secrets.GH_PAT }}
-      
+        with:
+          repository: indipe-paytech/indipe-partner-app
+          submodules: recursive
+          token: ${{ secrets.GH_PAT }}
+
       - name: Get Partner Details
         id: partners
         uses: fjogeleit/http-request-action@v1
         with:
-          url: 'https://dummyjson.com/c/78ea-b477-4a21-af9b'
+          url: 'https://dummyjson.com/c/0f70-99cb-4e66-b789'
           method: 'GET'
 
       - name: Download Assets
         run: |
-          assets=fromJson(steps.partners.outputs.response).assets
-          for asset in $assets
-          do
+          assets=$(echo '${{ steps.partners.outputs.response }}' | jq -c '.assets[]')
+          mkdir -p ./assets
+          for asset in $assets; do
             url=$(echo $asset | jq -r '.url')
             name=$(echo $asset | jq -r '.name')
-            echo "Downloading $name from $url"
-            wget -nc -P ./assets/$name $url
+            file="./assets/$(basename "$url")"
+            wget -nc -P $file $url
+
+            rename="./assets/$name"
+            if [ "$file" != "$rename" ]; then
+              mv $file $rename
+            fi
           done
         shell: bash
 
       - name: Move Assets
-        run: cp assets/* indipe-partner-app/packages/app/assets/logos/
+        run: |
+          rm -rf ./packages/app/assets/logos/*
+          cp -r ./assets/* ./packages/app/assets/logos/
         shell: bash
 
       - name: Set Secret Environment Variables from API Response
         run: |
-          partner=fromJson(steps.partners.outputs.response)
+          partner=${{ fromJson(steps.partners.outputs.response) }}
           echo "FIREBASE_TOKEN=$partner.firebase_token" >> $GITHUB_ENV
           echo "ANDROID_KEYSTORE=$partner.keystore" >> $GITHUB_ENV
           echo "ANDROID_KEYSTORE_PASSWORD=$partner.keystore_password" >> $GITHUB_ENV
           echo "ANDROID_KEY_ALIAS=$partner.key_alias" >> $GITHUB_ENV
           echo "ANDROID_KEY_PASSWORD=$partner.key_password" >> $GITHUB_ENV
+
+          env | grep GITHUB_ENV
+          env
         shell: bash
 
-      - name: Call Build Workflow
-        working-directory: indipe-partner-app
-        uses: indipe-paytech/shared-mobile-workflows/.github/workflows/build.yml@main
-        with:
-          ENVIROMENT: DEVELOPMENT_ENV
-          DOPPLER_CONFIG: stg
-          APP_VERSION: 0.0.${{ github.run_number }}
-          APP_NUMBER: ${{ github.run_number + 55 }}
-          ASSETS_GEN: true
-        secrets:
-          GH_PAT: ${{ secrets.GH_PAT }}
-          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
-          FIREBASE_TOKEN: ${{ env.FIREBASE_TOKEN }}
-          ANDROID_KEYSTORE: ${{ env.ANDROID_KEYSTORE }}
-          ANDROID_KEYSTORE_PASSWORD: ${{ env.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ env.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ env.ANDROID_KEY_PASSWORD }}
+  build-android:
+    needs: android
+    uses: indipe-paytech/shared-mobile-workflows/.github/workflows/build.yml@main
+    with:
+      ENVIRONMENT: DEVELOPMENT_ENV
+      DOPPLER_CONFIG: stg
+      APP_VERSION: 0.0.${{ github.run_number }}
+      APP_NUMBER: $(( ${{ github.run_number }} + 55 ))
+      ASSETS_GEN: true
+      SKIP_CHECKOUT: true
+    secrets:
+      GH_PAT: ${{ secrets.GH_PAT }}
+      DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+      FIREBASE_TOKEN: ${{ needs.android.outputs.FIREBASE_TOKEN }}
+      ANDROID_KEYSTORE: ${{ needs.android.outputs.ANDROID_KEYSTORE }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ needs.android.outputs.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ needs.android.outputs.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ needs.android.outputs.ANDROID_KEY_PASSWORD }}
