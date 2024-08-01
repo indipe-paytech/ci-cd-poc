@@ -27,7 +27,7 @@ jobs:
         id: partners
         uses: fjogeleit/http-request-action@v1
         with:
-          url: 'https://mocki.io/v1/2d2c2f38-ad15-4e67-a767-2b4f7d1dee61'
+          url: 'https://mocki.io/v1/c13e3669-c0c8-4457-8a47-0bbf7b04241f'
           method: 'GET'
 
       - name: Download Assets
@@ -73,7 +73,7 @@ jobs:
 
   build-android:
     needs: android
-    uses: indipe-paytech/shared-mobile-workflows/.github/workflows/build.yml@assets-gen
+    uses: indipe-paytech/shared-mobile-workflows/.github/workflows/build.yml@main
     with:
       ENVIRONMENT: STAGING_ENV
       DOPPLER_CONFIG: stg
