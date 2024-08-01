@@ -27,7 +27,7 @@ jobs:
         id: partners
         uses: fjogeleit/http-request-action@v1
         with:
-          url: 'https://mocki.io/v1/c13e3669-c0c8-4457-8a47-0bbf7b04241f'
+          url: 'https://mocki.io/v1/a4da5cb8-fbde-4861-9d07-7ea17793fbc9'
           method: 'GET'
 
       - name: Download Assets
@@ -76,10 +76,9 @@ jobs:
     uses: indipe-paytech/shared-mobile-workflows/.github/workflows/build.yml@main
     with:
       ENVIRONMENT: STAGING_ENV
-      DOPPLER_CONFIG: stg
+      DOPPLER_CONFIG: dev
       APP_VERSION: 0.0.${{ github.run_number }}
       APP_NUMBER: $(( ${{ github.run_number }} + 55 ))
-      ASSETS_GEN: true
       SKIP_CHECKOUT: true
     secrets:
       GH_PAT: ${{ secrets.GH_PAT }}

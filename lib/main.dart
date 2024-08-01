@@ -6,9 +6,7 @@ import 'package:go_router/go_router.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  MyApp({super.key});
-
-  final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
