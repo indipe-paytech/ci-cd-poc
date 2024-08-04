@@ -33,25 +33,19 @@ jobs:
       - name: Download Assets
         run: |
           assets=$(echo '${{ steps.partners.outputs.response }}' | jq -c '.assets[]')
-          mkdir -p ./assets
+          cd packages/app/assets/logos/
+          rm -rf *
           for asset in $assets; do
             url=$(echo $asset | jq -r '.url')
             name=$(echo $asset | jq -r '.name')
-            file="./assets/$(basename "$url")"
-            wget -nc -P $file $url
+            file=$(basename "$url")
+            wget -nc $url
 
-            rename="./assets/$name"
-            if [ "$file" != "$rename" ]; then
-              mv $file $rename
+            if [ "$file" != "$name" ]; then
+              mv $file $name
             fi
           done
-        shell: bash
-
-      - name: Move Assets
-        run: |
-          rm -rf ./packages/app/assets/logos/*
-          cp -r ./assets/* ./packages/app/assets/logos/
-          rm -rf ./assets
+          cd ../../../..
         shell: bash
 
       - name: Set Secret Environment Variables from API Response
