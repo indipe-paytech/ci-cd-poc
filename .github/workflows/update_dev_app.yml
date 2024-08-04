@@ -15,6 +15,13 @@ jobs:
     name: Build Android App
     runs-on: ubuntu-latest
 
+    outputs:
+      FIREBASE_TOKEN: ${{ steps.set-secrets.outputs.FIREBASE_TOKEN }}
+      ANDROID_KEYSTORE: ${{ steps.set-secrets.outputs.ANDROID_KEYSTORE }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ steps.set-secrets.outputs.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ steps.set-secrets.outputs.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ steps.set-secrets.outputs.ANDROID_KEY_PASSWORD }}
+
     steps:
       - name: Checkout Partner repository
         uses: actions/checkout@v4.1.7
@@ -49,6 +56,7 @@ jobs:
         shell: bash
 
       - name: Set Secret Environment Variables from API Response
+        id: set-secrets
         run: |
           partner=${{ fromJson(steps.partners.outputs.response) }}
           echo "FIREBASE_TOKEN=$partner.firebase_token" >> $GITHUB_OUTPUT
