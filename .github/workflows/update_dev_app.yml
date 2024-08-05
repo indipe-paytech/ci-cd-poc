@@ -34,7 +34,7 @@ jobs:
         id: partners
         uses: fjogeleit/http-request-action@v1
         with:
-          url: 'https://mocki.io/v1/a4da5cb8-fbde-4861-9d07-7ea17793fbc9'
+          url: 'https://mocki.io/v1/85309399-d332-4720-85c9-09dd53625940'
           method: 'GET'
 
       - name: Download Assets
@@ -68,7 +68,7 @@ jobs:
 
       - name: Cache Current State
         id: current-state
-        uses: actions/cache@v4.0.2
+        uses: actions/cache/save@v4.0.2
         with:
           path: ./*
           key: ${{ runner.os }}-app-${{ github.ref }}
