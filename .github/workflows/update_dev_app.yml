@@ -8,12 +8,11 @@ on:
 
 jobs:
   android:
+    name: Build Android App
+    runs-on: ubuntu-latest
     environment:
       name: android
       url: ${{ steps.deployments.outputs.alias }}
-
-    name: Build Android App
-    runs-on: ubuntu-latest
 
     outputs:
       FIREBASE_TOKEN: ${{ steps.set-secrets.outputs.FIREBASE_TOKEN }}
@@ -58,12 +57,12 @@ jobs:
       - name: Set Secret Environment Variables from API Response
         id: set-secrets
         run: |
-          partner=${{ fromJson(steps.partners.outputs.response) }}
-          echo "FIREBASE_TOKEN=$partner.firebase_token" >> $GITHUB_OUTPUT
-          echo "ANDROID_KEYSTORE=$partner.keystore" >> $GITHUB_OUTPUT
-          echo "ANDROID_KEYSTORE_PASSWORD=$partner.keystore_password" >> $GITHUB_OUTPUT
-          echo "ANDROID_KEY_ALIAS=$partner.key_alias" >> $GITHUB_OUTPUT
-          echo "ANDROID_KEY_PASSWORD=$partner.key_password" >> $GITHUB_OUTPUT
+          partner=$(echo '${{ steps.partners.outputs.response }}' | jq -r '.')
+          echo "FIREBASE_TOKEN=$(echo $partner | jq -r '.firebase_token')" >> $GITHUB_OUTPUT
+          echo "ANDROID_KEYSTORE=$(echo $partner | jq -r '.keystore')" >> $GITHUB_OUTPUT
+          echo "ANDROID_KEYSTORE_PASSWORD=$(echo $partner | jq -r '.keystore_password')" >> $GITHUB_OUTPUT
+          echo "ANDROID_KEY_ALIAS=$(echo $partner | jq -r '.key_alias')" >> $GITHUB_OUTPUT
+          echo "ANDROID_KEY_PASSWORD=$(echo $partner | jq -r '.key_password')" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Cache Current State
