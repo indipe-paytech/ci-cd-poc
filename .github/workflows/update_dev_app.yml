@@ -33,7 +33,7 @@ jobs:
         id: partners
         uses: fjogeleit/http-request-action@v1
         with:
-          url: 'https://mocki.io/v1/85309399-d332-4720-85c9-09dd53625940'
+          url: 'https://mocki.io/v1/1eb3b1cb-4db7-41ce-9a23-1ac3f6be9c8d'
           method: 'GET'
 
       - name: Download Assets
